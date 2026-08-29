@@ -567,3 +567,56 @@ QStatusBar {
     color: #6e7681;
     font-size: 12px;
 }
+
+/* ── Album / Artist Grid ────────────────────────────────────── */
+#grid_content {
+    background-color: #0d1117;
+}
+
+#grid_view_title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f0f6fc;
+}
+
+#grid_count_label {
+    color: #6e7681;
+    font-size: 12px;
+}
+
+QFrame#album_tile {
+    background-color: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+}
+
+QFrame#album_tile:hover {
+    background-color: #1c2128;
+    border-color: #4f9eff;
+}
+
+QLabel#tile_title {
+    color: #f0f6fc;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#tile_subtitle {
+    color: #8b949e;
+    font-size: 12px;
+}
+
+QLabel#tile_count {
+    color: #6e7681;
+    font-size: 11px;
+}
+
+/* ── Breadcrumb bar ─────────────────────────────────────────── */
+#breadcrumb_bar {
+    background-color: #161b22;
+}
+
+#breadcrumb_label {
+    color: #8b949e;
+    font-size: 13px;
+}

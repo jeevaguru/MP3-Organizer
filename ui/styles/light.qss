@@ -356,3 +356,56 @@ QSplitter::handle { background-color: #d0d7de; }
 
 #section_header { color: #8c959f; }
 #sidebar_stats_label { color: #8c959f; }
+
+/* ── Album / Artist Grid ────────────────────────────────────── */
+#grid_content {
+    background-color: #f6f8fa;
+}
+
+#grid_view_title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2328;
+}
+
+#grid_count_label {
+    color: #8c959f;
+    font-size: 12px;
+}
+
+QFrame#album_tile {
+    background-color: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+}
+
+QFrame#album_tile:hover {
+    background-color: #f0f6ff;
+    border-color: #0969da;
+}
+
+QLabel#tile_title {
+    color: #1f2328;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+QLabel#tile_subtitle {
+    color: #656d76;
+    font-size: 12px;
+}
+
+QLabel#tile_count {
+    color: #8c959f;
+    font-size: 11px;
+}
+
+/* ── Breadcrumb bar ─────────────────────────────────────────── */
+#breadcrumb_bar {
+    background-color: #f6f8fa;
+}
+
+#breadcrumb_label {
+    color: #656d76;
+    font-size: 13px;
+}

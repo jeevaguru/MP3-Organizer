@@ -18,7 +18,7 @@ from database.db_manager import DatabaseManager
 class SidebarWidget(QWidget):
     # ── Signals ───────────────────────────────────────────────────────────────
     scan_requested             = pyqtSignal(str)   # folder path (or '')
-    nav_changed                = pyqtSignal(str)   # 'library' | 'playlist:<id>'
+    nav_changed                = pyqtSignal(str)   # 'library' | 'albums' | 'artists'
     playlist_selected          = pyqtSignal(list)  # List[Track]
     duplicate_finder_requested = pyqtSignal()
     export_requested           = pyqtSignal(str)   # 'csv' | 'json'
@@ -64,9 +64,17 @@ class SidebarWidget(QWidget):
         self.nav_list.setObjectName("nav_list")
         self.nav_list.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        item_lib = QListWidgetItem("  Library")
+        item_lib = QListWidgetItem("  📚  Library")
         item_lib.setData(Qt.ItemDataRole.UserRole, 'library')
         self.nav_list.addItem(item_lib)
+
+        item_albums = QListWidgetItem("  💿  Albums")
+        item_albums.setData(Qt.ItemDataRole.UserRole, 'albums')
+        self.nav_list.addItem(item_albums)
+
+        item_artists = QListWidgetItem("  👤  Artists")
+        item_artists.setData(Qt.ItemDataRole.UserRole, 'artists')
+        self.nav_list.addItem(item_artists)
 
         root.addWidget(self.nav_list)
 
@@ -204,8 +212,8 @@ class SidebarWidget(QWidget):
 
     def _on_nav_clicked(self, item):
         key = item.data(Qt.ItemDataRole.UserRole)
-        if key == 'library':
-            self.nav_changed.emit('library')
+        if key in ('library', 'albums', 'artists'):
+            self.nav_changed.emit(key)
 
     def _on_playlist_clicked(self, item):
         pl = item.data(Qt.ItemDataRole.UserRole)

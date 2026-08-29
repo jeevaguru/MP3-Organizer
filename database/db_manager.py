@@ -316,7 +316,70 @@ class DatabaseManager:
         tracks_by_id = {t.id: t for t in Track.select().where(Track.id.in_(ids))}
         return [tracks_by_id[i] for i in ids if i in tracks_by_id]
 
+    # ── Grid-view queries ─────────────────────────────────────────────────────
+
+    def get_albums_with_stats(self, artist_id: int = None) -> list[dict]:
+        """Return albums with track count and a sample artwork blob.
+        If *artist_id* is given, filter to that artist only.
+        """
+        where = f"WHERE ar.id = {int(artist_id)}" if artist_id else ""
+        sql = f"""
+            SELECT
+                al.id,
+                COALESCE(al.name, 'Unknown Album')   AS name,
+                COALESCE(ar.name, 'Unknown Artist')   AS artist_name,
+                ar.id                                 AS artist_id,
+                COUNT(t.id)                           AS track_count,
+                (SELECT t2.artwork_blob FROM track t2
+                 WHERE t2.album_id = al.id
+                   AND t2.artwork_blob IS NOT NULL
+                 LIMIT 1)                             AS artwork_blob
+            FROM album al
+            LEFT JOIN artist ar ON al.artist_id = ar.id
+            LEFT JOIN track  t  ON t.album_id   = al.id
+            {where}
+            GROUP BY al.id
+            HAVING COUNT(t.id) > 0
+            ORDER BY LOWER(COALESCE(ar.name, '')), LOWER(COALESCE(al.name, ''))
+        """
+        cursor = db.execute_sql(sql)
+        cols   = [d[0] for d in cursor.description]
+        return [dict(zip(cols, row)) for row in cursor.fetchall()]
+
+    def get_artists_with_stats(self) -> list[dict]:
+        """Return artists with album count, track count and a sample artwork blob."""
+        sql = """
+            SELECT
+                ar.id,
+                COALESCE(ar.name, 'Unknown Artist') AS name,
+                COUNT(DISTINCT al.id)               AS album_count,
+                COUNT(t.id)                         AS track_count,
+                (SELECT t2.artwork_blob FROM track t2
+                 JOIN album al2 ON t2.album_id = al2.id
+                 WHERE al2.artist_id = ar.id
+                   AND t2.artwork_blob IS NOT NULL
+                 LIMIT 1)                           AS artwork_blob
+            FROM artist ar
+            LEFT JOIN album al ON al.artist_id = ar.id
+            LEFT JOIN track  t  ON t.artist_id = ar.id
+            GROUP BY ar.id
+            HAVING COUNT(t.id) > 0
+            ORDER BY LOWER(COALESCE(ar.name, ''))
+        """
+        cursor = db.execute_sql(sql)
+        cols   = [d[0] for d in cursor.description]
+        return [dict(zip(cols, row)) for row in cursor.fetchall()]
+
+    def get_tracks_by_album(self, album_id: int) -> List[Track]:
+        """Return all tracks belonging to an album, sorted by track number."""
+        return list(
+            Track.select()
+            .where(Track.album == album_id)
+            .order_by(Track.track_number.asc(), Track.title.asc())
+        )
+
     # ── Scan Folders ──────────────────────────────────────────────────────────
+
 
     def get_scan_folders(self) -> List[ScanFolder]:
         return list(ScanFolder.select())

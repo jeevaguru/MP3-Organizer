@@ -8,7 +8,8 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, QSettings, QTimer
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QFrame, QFileDialog, QMessageBox, QStatusBar, QLabel
+    QFrame, QFileDialog, QMessageBox, QStatusBar, QLabel,
+    QStackedWidget, QPushButton,
 )
 from PyQt6.QtGui import QIcon, QKeySequence, QShortcut
 
@@ -25,6 +26,7 @@ from scanner.watcher import FolderWatcher
 
 from ui.sidebar_widget import SidebarWidget
 from ui.library_view import LibraryView
+from ui.album_grid_view import AlbumGridView
 from ui.player_widget import PlayerWidget
 from ui.now_playing_panel import NowPlayingPanel
 from ui.scan_dialog import ScanDialog
@@ -81,7 +83,7 @@ class MainWindow(QMainWindow):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        # ── Content area ───────────────────────────────────────────────────
+        # ── Content row: sidebar | center | now-playing ────────────────────
         content = QWidget()
         content_layout = QHBoxLayout(content)
         content_layout.setContentsMargins(0, 0, 0, 0)
@@ -91,11 +93,59 @@ class MainWindow(QMainWindow):
         self.sidebar = SidebarWidget(self.db)
         content_layout.addWidget(self.sidebar)
 
-        # Library
-        self.library_view = LibraryView(self.db)
-        content_layout.addWidget(self.library_view, 1)
+        # ── Centre column: breadcrumb + stacked pages ──────────────────────
+        center = QWidget()
+        center_layout = QVBoxLayout(center)
+        center_layout.setContentsMargins(0, 0, 0, 0)
+        center_layout.setSpacing(0)
 
-        # Now Playing
+        # Breadcrumb bar (visible only when drilling from grid → track list)
+        self._breadcrumb = QWidget()
+        self._breadcrumb.setObjectName("breadcrumb_bar")
+        bc_row = QHBoxLayout(self._breadcrumb)
+        bc_row.setContentsMargins(14, 6, 14, 4)
+        bc_row.setSpacing(10)
+
+        self._bc_back_btn = QPushButton("← Back")
+        self._bc_back_btn.setObjectName("icon_btn")
+        self._bc_back_btn.setFixedHeight(28)
+        self._bc_back_btn.clicked.connect(self._back_to_grid)
+        bc_row.addWidget(self._bc_back_btn)
+
+        self._bc_label = QLabel()
+        self._bc_label.setObjectName("breadcrumb_label")
+        bc_row.addWidget(self._bc_label)
+        bc_row.addStretch()
+
+        bc_sep = QFrame()
+        bc_sep.setFrameShape(QFrame.Shape.HLine)
+
+        bc_outer = QVBoxLayout()
+        bc_outer.setContentsMargins(0, 0, 0, 0)
+        bc_outer.setSpacing(0)
+        bc_outer.addWidget(self._breadcrumb)
+        bc_outer.addWidget(bc_sep)
+
+        self._breadcrumb_container = QWidget()
+        self._breadcrumb_container.setLayout(bc_outer)
+        self._breadcrumb_container.setVisible(False)
+        center_layout.addWidget(self._breadcrumb_container)
+
+        # Stacked widget
+        self._stack = QStackedWidget()
+
+        # Page 0 — Library list view (existing)
+        self.library_view = LibraryView(self.db)
+        self._stack.addWidget(self.library_view)
+
+        # Page 1 — Album / Artist grid view
+        self.album_grid_view = AlbumGridView(self.db)
+        self._stack.addWidget(self.album_grid_view)
+
+        center_layout.addWidget(self._stack, 1)
+        content_layout.addWidget(center, 1)
+
+        # Now Playing panel (right column)
         self.now_playing = NowPlayingPanel(self.lyrics_service, self.artwork_service)
         self.now_playing.setFixedWidth(NOW_PLAYING_WIDTH)
         content_layout.addWidget(self.now_playing)
@@ -108,6 +158,10 @@ class MainWindow(QMainWindow):
 
         # ── Status bar ────────────────────────────────────────────────────
         self.setStatusBar(QStatusBar(self))
+
+        # Track which grid mode we were in before drilling into track list
+        self._last_grid_mode: str = 'albums'
+
 
     # ── Shortcuts ─────────────────────────────────────────────────────────────
 
@@ -151,10 +205,14 @@ class MainWindow(QMainWindow):
         # Sidebar
         self.sidebar.scan_requested.connect(self._open_scan_dialog)
         self.sidebar.nav_changed.connect(self._on_nav_changed)
-        self.sidebar.playlist_selected.connect(self.library_view.show_playlist)
+        self.sidebar.playlist_selected.connect(self._on_playlist_selected)
         self.sidebar.duplicate_finder_requested.connect(self._open_duplicate_finder)
         self.sidebar.export_requested.connect(self._export_library)
         self.sidebar.theme_toggle_requested.connect(self._toggle_theme)
+
+        # Grid view drill-down
+        self.album_grid_view.album_clicked.connect(self._on_album_tile_clicked)
+        self.album_grid_view.artist_clicked.connect(self._on_artist_tile_clicked)
 
     # ── Player handlers ───────────────────────────────────────────────────────
 
@@ -217,7 +275,58 @@ class MainWindow(QMainWindow):
 
     def _on_nav_changed(self, key: str):
         if key == 'library':
+            self._breadcrumb_container.setVisible(False)
+            self._stack.setCurrentIndex(0)
             self._refresh_library()
+        elif key == 'albums':
+            self._breadcrumb_container.setVisible(False)
+            self._last_grid_mode = 'albums'
+            self.album_grid_view.show_albums()
+            self._stack.setCurrentIndex(1)
+        elif key == 'artists':
+            self._breadcrumb_container.setVisible(False)
+            self._last_grid_mode = 'artists'
+            self.album_grid_view.show_artists()
+            self._stack.setCurrentIndex(1)
+
+    def _on_playlist_selected(self, tracks):
+        """Playlist selected from sidebar — switch to library list and show tracks."""
+        self._breadcrumb_container.setVisible(False)
+        self._stack.setCurrentIndex(0)
+        self.library_view.show_playlist(tracks)
+
+    def _on_album_tile_clicked(self, album_id: int):
+        """User clicked an album tile — drill in and show its track list."""
+        tracks = self.db.get_tracks_by_album(album_id)
+        if not tracks:
+            self.statusBar().showMessage("No tracks found for this album.", 3000)
+            return
+        # Determine album name for breadcrumb
+        try:
+            album_name = tracks[0].display_album()
+            artist_name = tracks[0].display_artist()
+            crumb = f"{artist_name}  ›  {album_name}"
+        except Exception:
+            crumb = "Album Tracks"
+
+        self.library_view.show_playlist(tracks)
+        self._bc_label.setText(crumb)
+        self._breadcrumb_container.setVisible(True)
+        self._stack.setCurrentIndex(0)
+
+    def _on_artist_tile_clicked(self, artist_id: int, artist_name: str):
+        """User clicked an artist tile — show that artist's albums in the grid."""
+        self._last_grid_mode = 'artist_albums'
+        self.album_grid_view.show_albums(
+            filter_artist_id=artist_id,
+            filter_artist_name=artist_name,
+        )
+        # Grid is already on page 1; breadcrumb not needed here (grid handles it)
+
+    def _back_to_grid(self):
+        """Called when user clicks ← Back in the breadcrumb bar."""
+        self._breadcrumb_container.setVisible(False)
+        self._stack.setCurrentIndex(1)
 
     def _toggle_theme(self):
         self._theme = 'light' if self._theme == 'dark' else 'dark'
