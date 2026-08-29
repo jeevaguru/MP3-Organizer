@@ -47,7 +47,7 @@ MP3 Organizer is a **standalone desktop application** that brings order to large
 
 ## 🖥️ Screenshots
 
-> _Coming soon — add screenshots of the main library view, player bar, tag editor, and equalizer here._
+> _Coming soon_
 
 ---
 
@@ -99,15 +99,15 @@ Download and install the **64-bit** version of VLC from [videolan.org](https://w
 **Option A — Clone with Git:**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/mp3-organizer.git
-cd mp3-organizer
+git clone https://github.com/YOUR_USERNAME/MP3-Organizer.git
+cd MP3-Organizer
 ```
 
 **Option B — Download ZIP:**
 
 1. Click the green **"Code"** button on this page
 2. Select **"Download ZIP"**
-3. Extract the ZIP to any folder (e.g., `C:\mp3-organizer\`)
+3. Extract the ZIP to any folder (e.g., `C:\MP3-Organizer\`)
 4. Open a terminal and `cd` into that folder
 
 ### Step 4 — Install Python Dependencies
@@ -199,7 +199,7 @@ The MP3 Organizer window will open. You're ready to go!
 ## 📁 Project Structure
 
 ```
-mp3-organizer/
+MP3-Organizer/
 │
 ├── main.py                  # Entry point — run this to launch the app
 ├── config.py                # App-wide constants, paths, EQ presets
