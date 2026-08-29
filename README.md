@@ -1,5 +1,3 @@
-<![CDATA[<div align="center">
-
 # 🎵 MP3 Organizer
 
 **A modern, lightweight desktop application to organize, browse, and play your local MP3 collection.**
@@ -8,8 +6,6 @@
 ![PyQt6](https://img.shields.io/badge/PyQt6-6.6%2B-green?logo=qt&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-informational?logo=windows)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-
-</div>
 
 ---
 
@@ -101,12 +97,14 @@ Download and install the **64-bit** version of VLC from [videolan.org](https://w
 ### Step 3 — Download MP3 Organizer
 
 **Option A — Clone with Git:**
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/mp3-organizer.git
 cd mp3-organizer
 ```
 
 **Option B — Download ZIP:**
+
 1. Click the green **"Code"** button on this page
 2. Select **"Download ZIP"**
 3. Extract the ZIP to any folder (e.g., `C:\mp3-organizer\`)
@@ -206,6 +204,8 @@ mp3-organizer/
 ├── main.py                  # Entry point — run this to launch the app
 ├── config.py                # App-wide constants, paths, EQ presets
 ├── requirements.txt         # Python dependencies
+├── README.md
+├── LICENSE
 ├── .gitignore
 │
 ├── database/
@@ -215,7 +215,7 @@ mp3-organizer/
 ├── scanner/
 │   ├── metadata.py          # MP3 tag reading & writing (Mutagen)
 │   ├── scanner.py           # Background folder scanner (QThread)
-│   └── watcher.py           # File system auto-watcher (Watchdog)
+│   └── watcher.py           # File system auto-watch (Watchdog)
 │
 ├── player/
 │   └── audio_player.py      # Playback engine (VLC primary, Qt fallback)
@@ -259,21 +259,26 @@ The app stores data in your user profile — **nothing is uploaded anywhere**:
 ## ❓ Troubleshooting
 
 **App doesn't open / crashes immediately**
+
 - Make sure Python 3.10+ is installed and on your PATH: `python --version`
 - Re-run `pip install -r requirements.txt` to ensure all dependencies are installed
 
 **No sound / playback not working**
+
 - Install 64-bit VLC from [videolan.org](https://www.videolan.org/vlc/)
 - Ensure VLC is installed in its default location (`C:\Program Files\VideoLAN\VLC`)
 
 **Equalizer button is greyed out**
+
 - The EQ requires VLC. Install 64-bit VLC and restart the app.
 
 **Tags not saving to file**
-- The MP3 file may be read-only or located in a protected folder. Check file permissions.
+
+- The MP3 file may be read-only or in a protected folder. Check file permissions.
 
 **Lyrics not found**
-- LRCLIB may not have lyrics for that track. Try editing the track title/artist in Tag Editor for better matching, then click "Fetch" again.
+
+- LRCLIB may not have lyrics for that track. Try editing the title/artist in Tag Editor for better matching, then click "Fetch" again.
 
 ---
 
@@ -293,7 +298,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ---
 
-<div align="center">
 Made with ❤️ and Python
-</div>
-]]>
