@@ -1,0 +1,8 @@
+PyQt6>=6.6.0
+mutagen>=1.47.0
+peewee>=3.17.0
+watchdog>=4.0.0
+syncedlyrics>=0.4.0
+musicbrainzngs>=0.7.1
+python-vlc>=3.0.20123
+requests>=2.31.0

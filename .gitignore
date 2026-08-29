@@ -1,0 +1,42 @@
+# .gitignore for MP3 Organizer
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.spec
+
+# Database (user-specific — should NOT be committed)
+*.db
+*.sqlite
+*.sqlite3
+
+# App data generated at runtime
+data/
+*.lrc
+*.log
+
+# IDE / editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# PyInstaller
+*.exe
+*.app
