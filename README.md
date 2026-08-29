@@ -47,7 +47,7 @@ MP3 Organizer is a **standalone desktop application** that brings order to large
 
 ## 🖥️ Screenshots
 
-> _Coming soon — add screenshots of the main library view, player bar, tag editor, and equalizer here._
+> _Coming soon_
 
 ---
 
